@@ -44,7 +44,8 @@ class SAGEConv(MessagePassing):
         self.lin_l.reset_parameters()
         self.lin_r.reset_parameters()
 
-    def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj, size: Size = None) -> Tensor:
+    def forward(self, x: Union[Tensor, OptPairTensor],
+                edge_index: Adj, size: Size = None) -> Tensor:
         """"""
         if isinstance(x, Tensor):
             x: OptPairTensor = (x, x)  # 이거 뭐한느 역할, 문법 특이하게 생김
@@ -53,20 +54,20 @@ class SAGEConv(MessagePassing):
         print(edge_index) # edge 연결정보
         print(x) # 노드 features
         out = self.propagate(edge_index, x=x, size=size)  # edge_index는 propagate 오류남
+        print(out)
         out = self.lin_l(out)  # lin_l에 변수 두개 들어가야하는데 하나만 들어감 어떻게 계산?
 
         x_r = x[1]  # output dimension
         if x_r is not None:  # output 차원이 1이상인 경우에 대해서만
-            out += self.lin_r(x_r)  # 얘도 변수 두개 들어가얗나느데 하나만 들어감. ???
+            out += self.lin_r(x_r)  # 얘도 변수 두개 들어가야 하는데 하나만 들어감. ???
 
         if self.normalize:
             out = F.normalize(out, p=2., dim=-1)
 
         return out
 
-    def message(self, x_j: Tensor) -> Tensor:  # x_j 어디서 온건가 ? tensor?
-        return x_j  # message 보내지는건가 ?
-
+    def message(self, x_j: Tensor) -> Tensor:
+        return x_j
     def message_and_aggregate(self, adj_t: SparseTensor, x: OptPairTensor) -> Tensor:
         adj_t = adj_t.set_value(None, layout=None)
         return matmul(adj_t, x[0], reduce=self.aggr)
