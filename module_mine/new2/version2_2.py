@@ -21,7 +21,7 @@ class mymodel10(torch.nn.Module):
 
     def __init__(self, A, F, edge_F, rawA):
         super(mymodel10, self).__init__()
-        self.rawA = A
+
         self.A = normalize(A).toarray()  # 인접행렬
         self.F = normalize(F).toarray()  # feature정보
         self.edge_F = torch.Tensor(edge_F) # edge_feature 정보
@@ -31,35 +31,59 @@ class mymodel10(torch.nn.Module):
         print('=' * 50)
 
         # 0으로 구성된 feature 생성
-        self.new_features = [[]]* F.shape[0]
-        print('self.new_features : {}'.format(self.new_features))
+        self.new_features = [[0]]* F.shape[0]
 
+        # 각 idx에 해당하는 edge_feature 값을 넣어줌
         for idx, A_idx in enumerate(rawA):
-            edge_info = self.new_features[rawA[idx][0]]
-
-            if edge_info:
-                self.new_features[rawA[idx][0]].append(edge_F[idx][0])
+            edge_info = A_idx[0]
+            if self.new_features[edge_info] != [0]:
+                self.new_features[edge_info].append(edge_F[idx][0])
             else:
                 self.new_features[rawA[idx][0]] = edge_F[idx]
 
-        self.new_features.fillna(0)
-        print(self.new_features)
+        print('각 노드에 해당하는 edge_features : {}'.format(self.new_features))
 
 
     def aggregate(self, method) -> Tensor:
         # new_features에 빈 곳 있으면 0으로 채워주고
-        self.new_features.fillna(0)
+        # self.new_features.fillna(0)
+        print(method)
+        aggr_result = []
+        if method == 'sum':
+            for idx in self.new_features:
+                if len(idx) >=2:
+                    aggr_result.append([sum(idx)])
+                else:
+                    aggr_result.append(idx)
+        elif method == 'mean':
+            for idx in self.new_features:
+                if len(idx) >= 2:
+                    aggr_result.append([np.mean(idx)])
+                else:
+                    aggr_result.append(idx)
+        elif method == 'min':
+            for idx in self.new_features:
+                if len(idx) >= 2:
+                    aggr_result.append([min(idx)])
+                else:
+                    aggr_result.append(idx)
+        elif method == 'max':
+            for idx in self.new_features:
+                if len(idx) >= 2:
+                    aggr_result.append([max(idx)])
+                else:
+                    aggr_result.append(idx)
+        else:
+            print('Not expected method. Expected [sum, mean, min, max].')
+
+        print('node_feature + edge_attr 결과 matrix')
+        print(aggr_result)
         
-        # sum, mean, min 이런 method 입력받아서
-        # 2개 이상일 때 위에서 선택한 연산 수행하고
-        
-        # transpose 해서 feature로 concat해주기
-    
-        self.newF = torch.cat([torch.Tensor(self.F), torch.Tensor(self.new_features)], dim=-1)
+        # LIST -> T가 가능하게
+        self.newF = torch.cat([torch.Tensor(self.F),
+                               torch.Tensor(aggr_result)], dim=-1)
         print(self.newF)
         self.newF = self.F
-
-
 
 
     def AFWlayer(self):
@@ -67,7 +91,7 @@ class mymodel10(torch.nn.Module):
         print('start AFWlayer')
         # A, F 연산
 
-        self.AF = torch.FloatTensor(np.array(np.matmul(self.A, self.newF.detach().numpy())))# AF
+        self.AF = torch.FloatTensor(np.array(np.matmul(self.A, self.newF)))# AF
         # AF 크기의 weight 생성
         self.weight = Parameter(torch.Tensor(np.random.rand(self.AF.size()[1],
                                                             self.AF.size()[1])))
@@ -90,4 +114,3 @@ class mymodel10(torch.nn.Module):
             print(self.newF)
 
         return self.newF
-

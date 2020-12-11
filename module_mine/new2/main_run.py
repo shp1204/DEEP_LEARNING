@@ -1,7 +1,7 @@
 
 import torch.nn.functional as F
 import torch.optim as optimizer
-from today_eight import *
+# from today_eight import *
 from version2_1 import *
 from version2_2 import *
 import torch
@@ -15,7 +15,10 @@ torch.manual_seed(111)
 #노드 연결 정보 # 변하지 않음.
 edges = np.array([[0 ,1],[2 ,3],[1 ,4],[3 ,4],[4 ,5],[4 ,6]])
 # 각 노드 특성 정보(H) = 7 X 4 # 시간 지나면서 계속 변함
-features = sp.csr_matrix([[1, 0, 0, 0],[0, 1, 0, 0],[1, 0, 0, 0],[0, 1, 0, 0],[0, 0, 1, 0],[0, 0, 0, 1],[0, 0, 0, 1]])
+features = sp.csr_matrix([[1, 0, 0, 0],[0, 1, 0, 0],
+                          [1, 0, 0, 0],[0, 1, 0, 0],
+                          [0, 0, 1, 0],[0, 0, 0, 1],
+                          [0, 0, 0, 1]])
 # edge 특성 정보 # 시간 지나면서 계속 변함
 edge_features = [[3],[5],[1],[10],[6],[8]]
 # labels # train용은 안 변함.
@@ -39,7 +42,6 @@ print(features)
 #model = mymodel8(adj, features)
 #x = model.forward()
 
-
 # mymodel9 : version2_1
 # edge_feature 정보도 포함
 #model = mymodel9(adj, features, edge_features)
@@ -52,9 +54,8 @@ print(features)
 # 분기점 [4, 5], [4, 6]의 경우 4에 해당하는 edge가 두 개이므로 sum, mean, min, max 등으로 설정할 수 있음
 # node_feature에 이 부분을 반영한 뒤 학습 진행
 model = mymodel10(adj, features, edge_features, edges)
-
-
-
+model.aggregate('max')
+x = model.forward()
 
 # Regression
 ## 학습 parameter 설정
