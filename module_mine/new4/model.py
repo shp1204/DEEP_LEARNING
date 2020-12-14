@@ -21,6 +21,7 @@ class mymodel(nn.Module):
         self.F = normalize(F.toarray()) # node_feature
         self.edge_F = edge_F # edge_feature
 
+
         # 전처리
         ## INPUT : A, F, eF, F와 eF를 결합할 방법
         pp = preprocessing(self.rawA, self.F, self.edge_F, method)

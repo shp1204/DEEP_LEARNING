@@ -21,6 +21,7 @@ class layer_1(torch.nn.Module):
 
         # AF
         self.AF = torch.FloatTensor(np.array(np.matmul(self.A, self.matrix)))
+        self.AF = self.AF/self.AF.sum(axis=1)[:,None]
         self.weight = Parameter(torch.Tensor(np.random.rand(self.AF.size()[1],
                                                             self.AF.size()[1])))
 
@@ -29,5 +30,4 @@ class layer_1(torch.nn.Module):
 
         # AFW
         self.AFW = torch.matmul(self.AF, self.weight).detach().numpy()
-
         return Func.relu(torch.Tensor(normalize(self.AFW)))
