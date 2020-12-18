@@ -27,8 +27,8 @@ labels = np.array([2, 3, 5, 0, 7, 4, 2, 10])
 
 
 # 전처리
-model = mymodel(edges, features, edge_features, 'linear') # sum, mean, min, max, linear
-# hop 2회 진행
+model = mymodel(edges, features, edge_features, 'mean') # sum, mean, min, max, linear
+
 x = model.forward()
 
 # train

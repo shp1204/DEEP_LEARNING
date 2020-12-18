@@ -2,7 +2,7 @@ import torch.nn.functional as F
 import torch.optim as optimizer
 from model import *
 
-torch.manual_seed(111)
+
 
 # data
 # 노드 연결 정보 # 변하지 않음.
@@ -28,8 +28,7 @@ labels = np.array([2, 3, 5, 0, 7, 4, 2, 10])
 
 # 전처리
 model = mymodel(edges, features, edge_features, 'mean') # sum, mean, min, max, linear
-# hop 2회 진행
-x = model.forward()
+x = model.hop()
 
 # train
 # 학습 parameter 설정
@@ -39,9 +38,11 @@ optims = optimizer.SGD([weight, bias], lr=0.01)
 
 torch.nn.init.xavier_uniform_(weight)
 
-print(x)
+
 ## train
-for i in range(10000 + 1):
+for i in range(1000 + 1):
+    torch.manual_seed(111)
+
     hypothesis = torch.matmul(x, weight) + bias
     cost = F.mse_loss(hypothesis.reshape(len(labels), ),
                       torch.FloatTensor(labels))
@@ -50,7 +51,7 @@ for i in range(10000 + 1):
     cost.backward()
     optims.step()
 
-    if i % 10 == 0:
+    if i % 100 == 0:
         print('epoch : {} cost : {}'.format(i, cost))
 
 print('=' * 50)

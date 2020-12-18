@@ -42,10 +42,10 @@ class mymodel(nn.Module):
 
 
 
-    def forward(self)-> torch.Tensor:
+    def hop(self)-> torch.Tensor:
 
         # hop 2회 계산
-        for hop in range(2):
+        for hop in range(5):
             # AFW -> F, AWeF -> eF
             self.F = layer_1(self.A, self.F).forward()
             self.edge_F = layer_1(self.A, self.edge_F).forward()
